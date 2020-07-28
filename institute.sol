@@ -5,8 +5,17 @@ contract Institute
     uint256 id;
     string name;
     address owner;
+    uint count = 123456;
+    uint256 noof = 0;
+    mapping(uint=>instruct) insdetails;
+    event instructor( uint _count, uint _id, string _name );
     
-    event instructor( uint _id, string _name );
+    struct instruct
+    {
+        uint id;
+        string name;
+
+    }
     
     constructor() public
     {
@@ -19,15 +28,16 @@ contract Institute
         _;
     }
     
-    function getInstructor() public view returns(uint, string memory)
-    {
-        return (id, name);
-    }
-    
     function addInstructor(uint256 _id, string memory _name) public isOwner
     {
-        id = _id;
-        name = _name;
-        emit instructor(id, name);
+        noof++;
+        insdetails[count] = instruct(_id, _name);
+        emit instructor(count ,_id, _name);
+        count++;
+    }
+    
+    function getnoof() public view returns(uint)
+    {
+        return noof;
     }
 }

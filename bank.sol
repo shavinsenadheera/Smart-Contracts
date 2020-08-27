@@ -1,33 +1,55 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.6.0;
 
-contract bank
+contract Bank
 {
-    uint total = 0;
-    address owner;
-    
-    constructor() public
+    uint count =0;
+    address clientaddress;
+    mapping(uint => client) newclient;
+    event deposit();
+    struct client
     {
-        owner = msg.sender;
+        address payable caddress;
+        uint cid;
+        string name;
+        uint bal;
+        bool confirm;
     }
     
-    modifier isOwner
+    function createclient(address payable _caddress ,string memory _name, uint _balance) public
     {
-        require(owner==msg.sender);
-        _;
+        newclient[count++] = client(_caddress,count+1111, _name, _balance,false);
     }
     
-    function deposite(uint _amount) public
+    function getclient(uint _cid) public view returns(address,uint, string memory, uint, string memory)
     {
-        total += _amount;
+        string memory _msg;
+        if(newclient[_cid].confirm==false)
+        {
+             _msg = "Account is not verified!";
+        }
+        else
+        {
+            _msg = "Account is verified"; 
+        }
+        return (newclient[_cid].caddress,newclient[_cid].cid, newclient[_cid].name, newclient[_cid].bal, _msg);
     }
     
-    function withdraw(uint _amount) public isOwner
+    function confirmaccount(uint _cid) public
     {
-        total -= _amount;
+        require(newclient[_cid].caddress==msg.sender);
+        newclient[_cid].confirm = true;
     }
     
-    function getTotal() public view isOwner returns(uint)
+    function saveamount(uint _cid, uint _amount) external
     {
-        return total;
+        require(newclient[_cid].confirm==true);
+        newclient[_cid].bal += _amount;
+    }
+    
+    function withraw(uint _cid, uint _amount) public 
+    {
+        require(newclient[_cid].confirm==true);
+        require(newclient[_cid].caddress==msg.sender);
+        newclient[_cid].bal -= _amount;
     }
 }

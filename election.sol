@@ -1,60 +1,64 @@
 pragma solidity ^0.4.18;
 
-contract election
+contract Election
 {
     address owner;
-    uint256 totalvotes=0;
-    uint256 cid = 11111111;
-    Candidate[] candidate;
-    mapping(address=>Voter) voter;
-    
-    struct Candidate
-    {
-        uint256 id;
-        string name;
-        uint256 votes; 
-    }
-    
-    struct Voter
-    {
-        bool voted;
-    }
+    uint totalvotes;
+    uint countcandidates = 0;
+    struct candidate{string name; uint256 votes;}
+    struct voter{bool voted;bool authorized;}
+    mapping(address => voter) Voters;
+    candidate[] candidates;
+    address[5] users = [0xbBEa9A07208A6AD3d44FbB0fb7E71D515aF0e887,0x7dC6186397B7A997187Aa871Ac7b99EB46a44cc8,0x42910673e4F1d6E579bB3F4405399199B37AD686,0x42910673e4F1d6E579bB3F4405399199B37AD686,0x60E117731057a9C02Db1b2dF8cf0ea1e4908D534];
     
     constructor() public
     {
         owner = msg.sender;
     }
     
-    modifier isowner
+    modifier isowner()
     {
-        require(owner==msg.sender, "You are not authorized person to modify this contract!");
+        require(msg.sender==owner);
         _;
     }
     
-    function addnewcandidate(string memory _name) public isowner
+    function addcandidate(string _name) isowner public
     {
-        candidate.push(Candidate(cid++, _name, 0));
+        candidates.push(candidate(_name, 0));
+        countcandidates++;
     }
     
-    function voting(uint _cindex) public
+    modifier isauthorized()
     {
-        require(!voter[msg.sender].voted, "You are not authorized to vote!");
-        candidate[_cindex].votes += 1;
-        totalvotes += 1;
-        voter[msg.sender].voted = true;
+        for(uint i = 0; i < 5; i++ )
+        {
+          if(users[i]==msg.sender)
+          {
+              Voters[msg.sender].authorized=true;
+              _;
+          }
+        }
     }
     
-    function getcandidatedetails(uint _cindex) public view returns(uint256, string memory, uint256)
+    function vote(uint _index) isauthorized public
     {
-        return(candidate[_cindex].id, candidate[_cindex].name, candidate[_cindex].votes);
+        require(!Voters[msg.sender].voted);
+        candidates[_index].votes++;
+        Voters[msg.sender].voted=true;
+        totalvotes++;
     }
     
-    function getcandidatevotes(uint _cindex) public view returns(uint256)
+    function getvotes(uint _index) public view returns(uint256)
     {
-        return candidate[_cindex].votes;
+        return candidates[_index].votes;
     }
     
-    function getTotalvotes() public view returns(uint256)
+    function gettotalcandidates() public view returns(uint)
+    {
+        return candidates.length;
+    }
+    
+    function getfullvotes() public view returns(uint256)
     {
         return totalvotes;
     }

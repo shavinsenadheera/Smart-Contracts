@@ -1,0 +1,42 @@
+pragma solidity ^0.5.17;
+  
+contract shop
+{ 
+    address payable owner;
+    uint iud = 1;
+    uint count = 0;
+    mapping (uint => product) Product;
+      
+    struct product
+    {
+        uint id;
+        address seller;
+        string name;
+        uint price;
+        uint quantity;
+    }
+    
+    constructor() public
+    {
+        owner = msg.sender;
+    }
+    
+    
+    function addProduct(string memory _name, uint _price, uint _quantity) public
+    {
+        Product[iud] = product(iud, msg.sender, _name, _price, _quantity);
+        iud++;
+    }
+    
+    function getProduct(uint _id) public view returns(uint, address, string memory, uint, uint)
+    {
+        return (Product[_id].id, Product[_id].seller, Product[_id].name,  Product[_id].price, Product[_id].quantity);
+    }
+      
+    function buyProduct(uint _id) payable external
+    {
+        uint cost = Product[_id].price;
+        require(cost==msg.value, "Check the payment...!");
+        owner.transfer(msg.value);
+    }
+}
